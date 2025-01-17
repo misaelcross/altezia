@@ -1,29 +1,19 @@
 import { createClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
 import { Database } from '@/types/supabase'
-
-// Cria um cliente Supabase com a chave de serviço para operações server-side
-export function createServerSupabaseClient() {
-  return createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        persistSession: false,
-      },
-    }
-  )
-}
+import { withLogging } from './middleware'
 
 // Cria um cliente Supabase com cookies para manter a sessão do usuário
-export function createServerActionClient() {
-  const headersList = headers()
-  return createClient<Database>(
+export async function createServerSupabaseClient() {
+  const headersList = await headers()
+  const client = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       auth: {
-        persistSession: false,
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
       },
       global: {
         headers: {
@@ -32,4 +22,21 @@ export function createServerActionClient() {
       },
     }
   )
+  
+  return withLogging(client)
+}
+
+// Cria um cliente Supabase com a chave de serviço para operações administrativas
+export async function createServerAdminClient() {
+  const client = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        persistSession: false,
+      },
+    }
+  )
+  
+  return withLogging(client)
 }

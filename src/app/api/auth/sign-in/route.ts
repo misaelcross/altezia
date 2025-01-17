@@ -1,11 +1,11 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
-import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json()
-    const supabase = createServerSupabaseClient()
+    const supabase = await createServerSupabaseClient()
+    const body = await request.json()
+    const { email, password } = body
 
     logger.info('Tentativa de login', { email })
 
@@ -15,20 +15,18 @@ export async function POST(request: Request) {
     })
 
     if (error) {
-      logger.error('Erro no login', { error, email })
-      return NextResponse.json(
-        { error: 'Email ou senha inválidos' },
-        { status: 401 }
-      )
+      logger.error('Falha no login', { email, error: error.message })
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 400,
+      })
     }
 
-    logger.info('Login bem-sucedido', { email })
-    return NextResponse.json({ data })
-  } catch (err) {
-    logger.error('Erro inesperado no login', { err })
-    return NextResponse.json(
-      { error: 'Erro ao processar a requisição' },
-      { status: 500 }
-    )
+    logger.info('Login realizado com sucesso', { email, userId: data.user?.id })
+    return new Response(JSON.stringify(data))
+  } catch (error) {
+    logger.error('Erro inesperado no login', { error })
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+    })
   }
 }

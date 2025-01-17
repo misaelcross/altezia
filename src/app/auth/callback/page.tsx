@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
-export default function AuthCallbackPage() {
+function AuthCallback() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -106,5 +106,13 @@ export default function AuthCallbackPage() {
         </CardFooter>
       </Card>
     </main>
+  )
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AuthCallback />
+    </Suspense>
   )
 }

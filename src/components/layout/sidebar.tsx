@@ -1,10 +1,9 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar'
+import { motion } from 'framer-motion'
 import {
   Users,
   UserPlus,
@@ -17,132 +16,144 @@ import {
   Library,
   BarChart2,
   Building2,
-  PrayingHands,
+  Church,
   LogOut,
-  Menu,
 } from 'lucide-react'
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface SidebarDemoProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function Sidebar({ className }: SidebarProps) {
+export function SidebarDemo({ className }: SidebarDemoProps) {
   const pathname = usePathname()
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const menuItems = [
     {
-      title: 'Dashboard',
-      icon: Home,
+      label: 'Dashboard',
       href: '/dashboard',
+      icon: <Home className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Membros',
-      icon: Users,
+      label: 'Membros',
       href: '/dashboard/members',
+      icon: <Users className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Visitantes',
-      icon: UserPlus,
+      label: 'Visitantes',
       href: '/dashboard/visitors',
+      icon: <UserPlus className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Células',
-      icon: Users,
+      label: 'Células',
       href: '/dashboard/cells',
+      icon: <Users className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Eventos',
-      icon: CalendarDays,
+      label: 'Eventos',
       href: '/dashboard/events',
+      icon: <CalendarDays className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Discipulado',
-      icon: BookOpen,
+      label: 'Discipulado',
       href: '/dashboard/discipleship',
+      icon: <BookOpen className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Financeiro',
-      icon: DollarSign,
+      label: 'Financeiro',
       href: '/dashboard/financial',
+      icon: <DollarSign className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Comunicação',
-      icon: MessageSquare,
+      label: 'Comunicação',
       href: '/dashboard/communication',
+      icon: <MessageSquare className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Voluntários',
-      icon: UserCog,
+      label: 'Voluntários',
       href: '/dashboard/volunteers',
+      icon: <UserCog className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Biblioteca',
-      icon: Library,
+      label: 'Biblioteca',
       href: '/dashboard/library',
+      icon: <Library className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Relatórios',
-      icon: BarChart2,
+      label: 'Relatórios',
       href: '/dashboard/reports',
+      icon: <BarChart2 className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Patrimônio',
-      icon: Building2,
+      label: 'Patrimônio',
       href: '/dashboard/assets',
+      icon: <Building2 className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
     {
-      title: 'Oração',
-      icon: PrayingHands,
+      label: 'Oração',
       href: '/dashboard/prayer',
+      icon: <Church className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
     },
   ]
 
   return (
-    <div
-      className={cn(
-        'relative flex flex-col h-screen border-r px-3 py-4 transition-all duration-300',
-        isCollapsed ? 'w-16' : 'w-64',
-        className
-      )}
-    >
-      <div className="flex items-center justify-between mb-4 px-2">
-        {!isCollapsed && <h2 className="text-lg font-semibold">Altezia</h2>}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="h-8 w-8"
-        >
-          <Menu className="h-4 w-4" />
-        </Button>
-      </div>
-      <ScrollArea className="flex-1 -mx-3">
-        <div className="space-y-1 p-3">
-          {menuItems.map((item) => (
-            <Link key={item.href} href={item.href}>
-              <Button
-                variant={pathname === item.href ? 'secondary' : 'ghost'}
+    <Sidebar open={open} setOpen={setOpen} className={className}>
+      <SidebarBody className="justify-between gap-10">
+        <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+          {open ? <Logo /> : <LogoIcon />}
+          <div className="mt-8 flex flex-col gap-2">
+            {menuItems.map((item, idx) => (
+              <SidebarLink 
+                key={idx} 
+                link={item}
+                open={open}
                 className={cn(
-                  'w-full justify-start',
-                  isCollapsed ? 'px-2' : 'px-4'
+                  pathname === item.href && "bg-neutral-100 dark:bg-neutral-800"
                 )}
-              >
-                <item.icon className={cn('h-4 w-4', !isCollapsed && 'mr-2')} />
-                {!isCollapsed && <span>{item.title}</span>}
-              </Button>
-            </Link>
-          ))}
+              />
+            ))}
+          </div>
         </div>
-      </ScrollArea>
-      <div className="mt-4 border-t pt-4">
-        <Button
-          variant="ghost"
-          className={cn('w-full justify-start', isCollapsed ? 'px-2' : 'px-4')}
-        >
-          <LogOut className={cn('h-4 w-4', !isCollapsed && 'mr-2')} />
-          {!isCollapsed && <span>Sair</span>}
-        </Button>
-      </div>
-    </div>
+        <div>
+          <SidebarLink
+            link={{
+              label: "Sair",
+              href: "/auth/sign-out",
+              icon: <LogOut className="h-5 w-5 text-neutral-700 dark:text-neutral-200 flex-shrink-0" />,
+            }}
+            open={open}
+          />
+        </div>
+      </SidebarBody>
+    </Sidebar>
+  )
+}
+
+const Logo = () => {
+  return (
+    <Link
+      href="/dashboard"
+      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+    >
+      <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+      <motion.span
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="font-medium text-black dark:text-white whitespace-pre"
+      >
+        Altezia
+      </motion.span>
+    </Link>
+  )
+}
+
+const LogoIcon = () => {
+  return (
+    <Link
+      href="/dashboard"
+      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+    >
+      <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+    </Link>
   )
 }

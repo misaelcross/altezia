@@ -7,19 +7,7 @@ interface LogMessage {
   data?: any
 }
 
-export const logger = {
-  info: (message: string, data?: any) => {
-    log('info', message, data)
-  },
-  warn: (message: string, data?: any) => {
-    log('warn', message, data)
-  },
-  error: (message: string, data?: any) => {
-    log('error', message, data)
-  },
-}
-
-function log(level: LogLevel, message: string, data?: any) {
+const log = (level: LogLevel, message: string, data?: any) => {
   const logMessage: LogMessage = {
     level,
     message,
@@ -27,14 +15,27 @@ function log(level: LogLevel, message: string, data?: any) {
     data,
   }
 
-  // Em produção, você pode enviar os logs para um serviço de logging
-  if (process.env.NODE_ENV === 'production') {
-    // TODO: Implementar envio para serviço de logging
-    console.log(JSON.stringify(logMessage))
-  } else {
-    console.log(`[${logMessage.timestamp}] ${level.toUpperCase()}: ${message}`)
-    if (data) {
-      console.log('Data:', data)
+  if (typeof window !== 'undefined') {
+    // Client-side logging
+    switch (level) {
+      case 'info':
+        console.log(message, data)
+        break
+      case 'warn':
+        console.warn(message, data)
+        break
+      case 'error':
+        console.error(message, data)
+        break
     }
+  } else {
+    // Server-side logging
+    console[level](message, data)
   }
+}
+
+export const logger = {
+  info: (message: string, data?: any) => log('info', message, data),
+  warn: (message: string, data?: any) => log('warn', message, data),
+  error: (message: string, data?: any) => log('error', message, data),
 }

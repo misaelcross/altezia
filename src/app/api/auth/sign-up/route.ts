@@ -1,18 +1,22 @@
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { createServerSupabaseClient, createServerAdminClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json()
-    const supabase = createServerSupabaseClient()
+    const { email, password, name } = await request.json()
+    const supabase = await createServerSupabaseClient()
+    const adminClient = await createServerAdminClient()
 
-    logger.info('Tentativa de criação de conta', { email })
+    logger.info('Tentativa de criação de conta', { email, name })
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        data: {
+          name,
+        },
         emailRedirectTo: `${request.headers.get('origin')}/auth/callback`,
       },
     })
@@ -26,21 +30,28 @@ export async function POST(request: Request) {
     }
 
     // Criar registro do usuário na tabela users com role inicial
-    const { error: userError } = await supabase
-      .from('users')
-      .insert([
-        {
-          id: data.user?.id,
-          email: data.user?.email,
-          role: 'member',
-        },
-      ])
+    if (data.user?.id) {
+      const { error: userError } = await adminClient
+        .from('users')
+        .insert([
+          {
+            id: data.user.id,
+            email: data.user.email,
+            role: 'member',
+          },
+        ])
 
-    if (userError) {
-      logger.error('Erro ao criar registro do usuário', { userError, email })
+      if (userError) {
+        logger.error('Erro ao criar registro do usuário', { userError, email })
+      }
     }
 
-    logger.info('Conta criada com sucesso', { email })
+    logger.info('Conta criada com sucesso', { 
+      email, 
+      userId: data.user?.id,
+      emailConfirmed: data.user?.confirmed_at ? true : false 
+    })
+    
     return NextResponse.json({ data })
   } catch (err) {
     logger.error('Erro inesperado na criação de conta', { err })
