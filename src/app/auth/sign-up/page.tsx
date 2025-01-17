@@ -1,9 +1,9 @@
-import { SignInForm } from '@/components/auth/sign-in-form'
+import { SignUpForm } from '@/components/auth/sign-up-form'
 
-export default function Home() {
+export default function SignUpPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-slate-50">
-      <SignInForm />
+      <SignUpForm />
     </main>
   )
 }
